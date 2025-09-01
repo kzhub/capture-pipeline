@@ -13,8 +13,9 @@
     "install-all": "yarn install && cd web && yarn install"
   },
   "dependencies": {
-    "express": "^4.19.2",
+    "concurrently": "^8.2.2",
     "cors": "^2.8.5",
-    "concurrently": "^8.2.2"
+    "express": "^4.19.2",
+    "uuid": "^11.1.0"
   }
 }

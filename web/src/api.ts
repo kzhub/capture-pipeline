@@ -51,4 +51,16 @@ export const api = {
     });
     return response.data;
   },
+
+  // Get active uploads
+  async getUploads() {
+    const response = await apiClient.get('/uploads');
+    return response.data;
+  },
+
+  // Get specific upload status
+  async getUpload(uploadId: string) {
+    const response = await apiClient.get(`/uploads/${uploadId}`);
+    return response.data;
+  },
 };

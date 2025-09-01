@@ -492,8 +492,8 @@ upload_to_s3() {
             if aws s3 cp "$file_path" "$s3_path" \
                 --profile "$AWS_PROFILE" \
                 --region "$AWS_REGION" \
-                --no-progress \
-                2>/dev/null; then
+                --storage-class "${S3_STORAGE_CLASS:-STANDARD}" \
+                --no-progress; then
                 record_uploaded "$SOURCE_DIR" "$file_path"
                 ((upload_count++))
                 [ "$VERBOSE" = true ] && success "完了: $filename"

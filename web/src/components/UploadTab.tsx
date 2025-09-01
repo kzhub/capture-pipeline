@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   Card,
@@ -15,6 +15,7 @@ import {
   CircularProgress,
   Switch,
   FormControlLabel,
+  LinearProgress,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { CloudUpload, FolderOpen } from '@mui/icons-material';
@@ -26,12 +27,48 @@ export function UploadTab() {
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const [dryRun, setDryRun] = useState(true);
+  const [activeUploadId, setActiveUploadId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: volumes, isLoading: volumesLoading } = useQuery({
     queryKey: ['volumes'],
     queryFn: api.getVolumes,
   });
+
+  // Check for active uploads on component mount and refresh
+  const { data: activeUploads } = useQuery({
+    queryKey: ['uploads'],
+    queryFn: api.getUploads,
+    refetchInterval: 2000, // Refresh every 2 seconds
+  });
+
+  // Monitor specific upload if active
+  const { data: uploadStatus } = useQuery({
+    queryKey: ['upload', activeUploadId],
+    queryFn: () => activeUploadId ? api.getUpload(activeUploadId) : null,
+    enabled: !!activeUploadId,
+    refetchInterval: 1000, // Refresh every second
+  });
+
+  // Restore active upload on component mount
+  useEffect(() => {
+    if (activeUploads && activeUploads.length > 0) {
+      const runningUpload = activeUploads.find((upload: any) => 
+        upload.status === 'running' || upload.status === 'interrupted'
+      );
+      if (runningUpload && !activeUploadId) {
+        setActiveUploadId(runningUpload.id);
+        setSelectedPath(runningUpload.sourcePath || '');
+        if (runningUpload.startDate) {
+          setStartDate(dayjs(runningUpload.startDate));
+        }
+        if (runningUpload.endDate) {
+          setEndDate(dayjs(runningUpload.endDate));
+        }
+        setDryRun(runningUpload.dryRun || false);
+      }
+    }
+  }, [activeUploads, activeUploadId]);
 
   const handleDirectorySelect = () => {
     fileInputRef.current?.click();
@@ -60,6 +97,11 @@ export function UploadTab() {
       endDate?: string; 
       dryRun: boolean 
     }) => api.uploadPhotos(params.sourcePath, params.startDate, params.endDate, params.dryRun),
+    onSuccess: (data) => {
+      if (data.uploadId) {
+        setActiveUploadId(data.uploadId);
+      }
+    },
   });
 
   const handleUpload = () => {
@@ -167,6 +209,75 @@ export function UploadTab() {
             {dryRun ? '実行内容を確認' : 'アップロード開始'}
           </Button>
         </Box>
+
+        {/* Active Upload Status */}
+        {activeUploadId && uploadStatus && (
+          <Box sx={{ mt: 4, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  アップロード進行状況
+                </Typography>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Status: {uploadStatus.status} {uploadStatus.currentFile && `| Current: ${uploadStatus.currentFile}`}
+                </Typography>
+                
+                {uploadStatus.progress && uploadStatus.progress.total > 0 && (
+                  <Box sx={{ mt: 2 }}>
+                    <LinearProgress 
+                      variant="determinate" 
+                      value={(uploadStatus.progress.completed / uploadStatus.progress.total) * 100}
+                      sx={{ height: 8, borderRadius: 1 }}
+                    />
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                      {uploadStatus.progress.completed} / {uploadStatus.progress.total} files 
+                      {uploadStatus.progress.skipped > 0 && ` (${uploadStatus.progress.skipped} skipped)`}
+                    </Typography>
+                  </Box>
+                )}
+
+                {uploadStatus.status === 'completed' && (
+                  <Alert severity="success" sx={{ mt: 2, borderRadius: 2 }}>
+                    アップロードが完了しました
+                  </Alert>
+                )}
+
+                {uploadStatus.status === 'failed' && (
+                  <Alert severity="error" sx={{ mt: 2, borderRadius: 2 }}>
+                    アップロードでエラーが発生しました
+                  </Alert>
+                )}
+
+                {uploadStatus.status === 'interrupted' && (
+                  <Alert severity="warning" sx={{ mt: 2, borderRadius: 2 }}>
+                    アップロードが中断されました（サーバー再起動）
+                  </Alert>
+                )}
+
+                {uploadStatus.output && (
+                  <Box
+                    component="pre"
+                    sx={{
+                      whiteSpace: 'pre-wrap',
+                      fontSize: '0.75rem',
+                      fontFamily: 'monospace',
+                      backgroundColor: 'grey.50',
+                      p: 2,
+                      mt: 2,
+                      borderRadius: 1,
+                      maxHeight: 200,
+                      overflow: 'auto',
+                      border: '1px solid',
+                      borderColor: 'grey.200',
+                    }}
+                  >
+                    {uploadStatus.output}
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+          </Box>
+        )}
 
         {(uploadMutation.isError || uploadMutation.isSuccess || uploadMutation.data?.output) && (
           <Box sx={{ mt: 4, display: 'flex', flexDirection: 'column', gap: 2 }}>
