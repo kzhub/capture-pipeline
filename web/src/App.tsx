@@ -42,6 +42,14 @@ const theme = createTheme({
     borderRadius: 8,
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: `
+        button:focus,
+        button:focus-visible {
+          outline: none !important;
+        }
+      `,
+    },
     MuiCard: {
       styleOverrides: {
         root: {
@@ -65,6 +73,9 @@ const theme = createTheme({
           '&:focus': {
             outline: 'none',
           },
+          '&:focus-visible': {
+            outline: 'none',
+          },
         },
       },
     },
@@ -75,51 +86,6 @@ const theme = createTheme({
           backgroundColor: '#ffffff',
           color: '#1976d2',
           borderBottom: '1px solid #e2e8f0',
-        },
-      },
-    },
-    MuiTabs: {
-      styleOverrides: {
-        root: {
-          minHeight: 48,
-          height: 48,
-        },
-        indicator: {
-          backgroundColor: '#1976d2',
-          height: 2,
-        },
-      },
-    },
-    MuiTab: {
-      defaultProps: {
-        disableRipple: true,
-        disableTouchRipple: true,
-      },
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-          fontWeight: 500,
-          color: '#4a5568',
-          minHeight: 48,
-          height: 48,
-          transition: 'color 0.2s ease',
-          overflow: 'hidden',
-          '&.Mui-selected': {
-            color: '#1976d2',
-            fontWeight: 600,
-          },
-          '&:hover': {
-            color: '#1976d2',
-            backgroundColor: 'transparent',
-          },
-          '&:focus': {
-            outline: '2px solid #1976d2',
-            outlineOffset: '2px',
-            backgroundColor: 'transparent',
-          },
-          '& .MuiTouchRipple-root': {
-            display: 'none !important',
-          },
         },
       },
     },
@@ -173,14 +139,17 @@ function App() {
                   <Tab 
                     label="SDカードから取り込み" 
                     value="import"
+                    tabIndex={0}
                   />
                   <Tab 
                     label="ローカルからアップロード" 
                     value="upload"
+                    tabIndex={0}
                   />
                   <Tab 
                     label="設定" 
                     value="settings"
+                    tabIndex={0}
                   />
                 </Tabs>
               </Box>
