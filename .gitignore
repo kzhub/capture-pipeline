@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+
+# 設定ファイル
+.env
+~/.photo-backup-config/
+
+# アップロード履歴
+.uploaded
+
+# テスト用ファイル
+test/
+*.test
+
+# ログファイル
+*.log
+
+# 一時ファイル
+*.tmp
+*.temp
