@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   Card,
@@ -26,11 +26,27 @@ export function UploadTab() {
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const [dryRun, setDryRun] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: volumes, isLoading: volumesLoading } = useQuery({
     queryKey: ['volumes'],
     queryFn: api.getVolumes,
   });
+
+  const handleDirectorySelect = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const firstFile = files[0];
+      // webkitRelativePathからディレクトリ名を抽出
+      const pathParts = firstFile.webkitRelativePath.split('/');
+      const directoryName = pathParts[0];
+      setSelectedPath(directoryName);
+    }
+  };
 
   const uploadMutation = useMutation({
     mutationFn: (params: { 
@@ -70,21 +86,30 @@ export function UploadTab() {
           gap: 4, 
           mb: 4 
         }}>
-          <FormControl fullWidth>
-            <InputLabel>アップロード元ディレクトリ</InputLabel>
-            <Select
-              value={selectedPath}
-              onChange={(e) => setSelectedPath(e.target.value)}
-              startAdornment={<FolderOpen sx={{ mr: 1 }} />}
-              disabled={volumesLoading}
+          <Box>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              style={{ display: 'none' }}
+              webkitdirectory=""
+              directory=""
+              multiple
+            />
+            <Button
+              variant="outlined"
+              onClick={handleDirectorySelect}
+              startIcon={<FolderOpen />}
+              fullWidth
+              sx={{ 
+                justifyContent: 'flex-start', 
+                textAlign: 'left',
+                height: '56px'
+              }}
             >
-              {volumes?.map((volume) => (
-                <MenuItem key={volume.path} value={volume.path}>
-                  {volume.name} ({volume.path})
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              {selectedPath || 'アップロード元ディレクトリを選択'}
+            </Button>
+          </Box>
 
           <DatePicker
             label="開始日（オプション）"
