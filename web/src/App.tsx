@@ -89,6 +89,33 @@ const theme = createTheme({
         },
       },
     },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#ffffff',
+          paddingLeft: '4px',
+          paddingRight: '4px',
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        notchedOutline: {
+          '& legend': {
+            maxWidth: '100%',
+          },
+        },
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-notchedOutline legend': {
+            maxWidth: '100%',
+          },
+        },
+      },
+    },
   },
 });
 
