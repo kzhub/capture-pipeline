@@ -96,7 +96,9 @@ load_config() {
         exit 1
     fi
     
+    set +u  # 一時的にundefined変数チェックを無効化
     source "$CONFIG_FILE"
+    set -u  # 再度有効化
     
     # 環境変数からS3バケットを読み込み（環境変数が優先）
     if [ -n "${PHOTO_BACKUP_BUCKET:-}" ]; then
@@ -363,7 +365,7 @@ import_from_sd() {
             [ "$VERBOSE" = true ] && success "コピー完了: $filename"
         fi
         
-    done < <(find "$sd_path" -type f -regex ".*\.\($ext_pattern\)$" -print0 2>/dev/null)
+    done < <(find "$sd_path" \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.heic" -o -iname "*.heif" -o -iname "*.dng" -o -iname "*.raf" -o -iname "*.cr2" -o -iname "*.cr3" -o -iname "*.nef" -o -iname "*.arw" -o -iname "*.orf" -o -iname "*.rw2" \) -type f -print0 2>/dev/null)
     
     echo ""
     success "取り込み完了: $imported_count ファイル (スキップ: $skipped_count)"
@@ -500,7 +502,7 @@ upload_to_s3() {
             fi
         fi
         
-    done < <(find "$SOURCE_DIR" -type f -regex ".*\.\($ext_pattern\)$" -print0 2>/dev/null)
+    done < <(find "$SOURCE_DIR" \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.heic" -o -iname "*.heif" -o -iname "*.dng" -o -iname "*.raf" -o -iname "*.cr2" -o -iname "*.cr3" -o -iname "*.nef" -o -iname "*.arw" -o -iname "*.orf" -o -iname "*.rw2" \) -type f -print0 2>/dev/null)
     
     # サマリー表示
     echo ""
@@ -594,7 +596,7 @@ if ! command -v aws &> /dev/null; then
 fi
 
 # AWS認証チェック
-if ! aws sts get-caller-identity --profile "$AWS_PROFILE" &> /dev/null; then
+if ! aws sts get-caller-identity --profile "${AWS_PROFILE:-default}" &> /dev/null; then
     error "AWS認証に失敗しました。aws configure を実行してください"
 fi
 

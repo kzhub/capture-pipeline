@@ -12,12 +12,13 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const HOME_DIR = process.env.HOME || process.env.USERPROFILE;
 
 app.use(cors());
 app.use(express.json());
 
 // Get config file path
-const CONFIG_DIR = path.join(process.env.HOME, '.photo-backup-config');
+const CONFIG_DIR = path.join(HOME_DIR, '.photo-backup-config');
 const CONFIG_FILE = path.join(CONFIG_DIR, 'config');
 
 // Load configuration
@@ -196,8 +197,33 @@ app.post('/api/upload', async (req, res) => {
     return res.status(400).json({ error: 'Source path is required' });
   }
   
+  // ディレクトリ名からフルパスを解決
+  let fullPath = sourcePath;
+  if (!path.isAbsolute(sourcePath)) {
+    // 一般的な場所を検索
+    const commonPaths = [
+      path.join(HOME_DIR, 'Desktop', sourcePath),
+      path.join(HOME_DIR, 'Pictures', sourcePath),
+      path.join(HOME_DIR, 'Downloads', sourcePath),
+      path.join('/Volumes', sourcePath),
+      path.join(HOME_DIR, sourcePath)
+    ];
+    
+    for (const testPath of commonPaths) {
+      try {
+        const stat = await fs.stat(testPath);
+        if (stat.isDirectory()) {
+          fullPath = testPath;
+          break;
+        }
+      } catch (e) {
+        // 続行
+      }
+    }
+  }
+  
   const scriptPath = path.join(__dirname, 'backup-photos.sh');
-  const args = ['--source', sourcePath];
+  const args = ['--source', fullPath];
   
   if (startDate) {
     args.push('--start', startDate);

@@ -41,10 +41,15 @@ export function UploadTab() {
     const files = event.target.files;
     if (files && files.length > 0) {
       const firstFile = files[0];
-      // webkitRelativePathからディレクトリ名を抽出
+      // webkitRelativePathから完全パスを構築
       const pathParts = firstFile.webkitRelativePath.split('/');
-      const directoryName = pathParts[0];
-      setSelectedPath(directoryName);
+      if (pathParts.length > 1) {
+        // ファイルが選択された場合、そのディレクトリの完全パスを推測
+        // ブラウザのセキュリティ制限により、実際のパスは取得できないため、
+        // 選択されたディレクトリ名のみを表示し、サーバーサイドで解決する
+        const directoryName = pathParts[0];
+        setSelectedPath(directoryName);
+      }
     }
   };
 
