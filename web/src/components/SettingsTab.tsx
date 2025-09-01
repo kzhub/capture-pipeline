@@ -90,7 +90,7 @@ export function SettingsTab() {
 
   return (
     <>
-      <Card elevation={2}>
+      <Card elevation={0} sx={{ height: 'fit-content' }}>
         <CardContent sx={{ p: 4 }}>
           <Typography variant="h5" gutterBottom sx={{ mb: 3, display: 'flex', alignItems: 'center' }}>
             <Settings sx={{ mr: 1 }} />
@@ -238,13 +238,13 @@ export function SettingsTab() {
             </Box>
 
             {saveMutation.isError && (
-              <Alert severity="error">
+              <Alert severity="error" sx={{ borderRadius: 2 }}>
                 設定の保存に失敗しました: {saveMutation.error?.message}
               </Alert>
             )}
 
             {saveMutation.isSuccess && (
-              <Alert severity="success">
+              <Alert severity="success" sx={{ borderRadius: 2 }}>
                 設定を保存しました
               </Alert>
             )}

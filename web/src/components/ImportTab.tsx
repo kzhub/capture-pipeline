@@ -49,7 +49,7 @@ export function ImportTab() {
   };
 
   return (
-    <Card elevation={2}>
+    <Card elevation={0} sx={{ height: 'fit-content' }}>
       <CardContent sx={{ p: 4 }}>
         <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
           SDカード/カメラから写真を取り込み

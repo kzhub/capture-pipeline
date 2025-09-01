@@ -55,16 +55,21 @@ export function UploadTab() {
   };
 
   return (
-    <Card>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
+    <Card elevation={0} sx={{ height: 'fit-content' }}>
+      <CardContent sx={{ p: 4 }}>
+        <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
           ローカルフォルダからS3へアップロード
         </Typography>
-        <Typography variant="body2" color="text.secondary" gutterBottom>
+        <Typography variant="body1" color="text.secondary" gutterBottom sx={{ mb: 4 }}>
           ローカルに保存済みの写真をS3にアップロードします
         </Typography>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 3 }}>
+        <Box sx={{ 
+          display: 'grid', 
+          gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, 
+          gap: 4, 
+          mb: 4 
+        }}>
           <FormControl fullWidth>
             <InputLabel>アップロード元ディレクトリ</InputLabel>
             <Select
@@ -81,35 +86,38 @@ export function UploadTab() {
             </Select>
           </FormControl>
 
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <DatePicker
-              label="開始日（オプション）"
-              value={startDate}
-              onChange={setStartDate}
-              format="YYYY-MM-DD"
-              slotProps={{
-                textField: { fullWidth: true }
-              }}
-            />
-            <DatePicker
-              label="終了日（オプション）"
-              value={endDate}
-              onChange={setEndDate}
-              format="YYYY-MM-DD"
-              slotProps={{
-                textField: { fullWidth: true }
-              }}
-            />
-          </Box>
+          <DatePicker
+            label="開始日（オプション）"
+            value={startDate}
+            onChange={setStartDate}
+            format="YYYY-MM-DD"
+            slotProps={{
+              textField: { fullWidth: true }
+            }}
+          />
+          
+          <DatePicker
+            label="終了日（オプション）"
+            value={endDate}
+            onChange={setEndDate}
+            format="YYYY-MM-DD"
+            slotProps={{
+              textField: { fullWidth: true }
+            }}
+          />
+        </Box>
 
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'flex-start' }}>
           <FormControlLabel
             control={
               <Switch
                 checked={dryRun}
                 onChange={(e) => setDryRun(e.target.checked)}
+                color="primary"
               />
             }
             label="ドライラン（確認のみ、実際には実行しない）"
+            sx={{ mb: 2 }}
           />
 
           <Button
@@ -124,47 +132,54 @@ export function UploadTab() {
               )
             }
             size="large"
+            sx={{ px: 4, py: 1.5 }}
           >
             {dryRun ? '実行内容を確認' : 'アップロード開始'}
           </Button>
-
-          {uploadMutation.isError && (
-            <Alert severity="error">
-              エラーが発生しました: {uploadMutation.error?.message}
-            </Alert>
-          )}
-
-          {uploadMutation.isSuccess && (
-            <Alert severity="success">
-              {dryRun ? '実行内容の確認が完了しました' : 'アップロードが完了しました'}
-            </Alert>
-          )}
-
-          {uploadMutation.data?.output && (
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="subtitle2" gutterBottom>
-                  実行結果:
-                </Typography>
-                <Box
-                  component="pre"
-                  sx={{
-                    whiteSpace: 'pre-wrap',
-                    fontSize: '0.875rem',
-                    fontFamily: 'monospace',
-                    backgroundColor: 'grey.100',
-                    p: 2,
-                    borderRadius: 1,
-                    maxHeight: 400,
-                    overflow: 'auto',
-                  }}
-                >
-                  {uploadMutation.data.output}
-                </Box>
-              </CardContent>
-            </Card>
-          )}
         </Box>
+
+        {(uploadMutation.isError || uploadMutation.isSuccess || uploadMutation.data?.output) && (
+          <Box sx={{ mt: 4, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {uploadMutation.isError && (
+              <Alert severity="error" sx={{ borderRadius: 2 }}>
+                エラーが発生しました: {uploadMutation.error?.message}
+              </Alert>
+            )}
+
+            {uploadMutation.isSuccess && (
+              <Alert severity="success" sx={{ borderRadius: 2 }}>
+                {dryRun ? '実行内容の確認が完了しました' : 'アップロードが完了しました'}
+              </Alert>
+            )}
+
+            {uploadMutation.data?.output && (
+              <Card variant="outlined" sx={{ mt: 2 }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    実行結果
+                  </Typography>
+                  <Box
+                    component="pre"
+                    sx={{
+                      whiteSpace: 'pre-wrap',
+                      fontSize: '0.875rem',
+                      fontFamily: 'monospace',
+                      backgroundColor: 'grey.50',
+                      p: 3,
+                      borderRadius: 2,
+                      maxHeight: 400,
+                      overflow: 'auto',
+                      border: '1px solid',
+                      borderColor: 'grey.200',
+                    }}
+                  >
+                    {uploadMutation.data.output}
+                  </Box>
+                </CardContent>
+              </Card>
+            )}
+          </Box>
+        )}
       </CardContent>
     </Card>
   );
