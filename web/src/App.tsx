@@ -125,17 +125,7 @@ function App() {
               </Toolbar>
             </AppBar>
 
-            <Container 
-              maxWidth={false}
-              sx={{ 
-                flex: 1, 
-                py: 3,
-                maxWidth: '1200px',
-                minWidth: '800px',
-                mx: 'auto',
-                px: { xs: 2, sm: 3, md: 4 }
-              }}
-            >
+            <Box sx={{ flex: 1, width: '100vw' }}>
               <Box sx={{ 
                 borderBottom: 1, 
                 borderColor: 'divider', 
@@ -144,7 +134,7 @@ function App() {
                 top: 0,
                 backgroundColor: 'background.default',
                 zIndex: 1,
-                mx: -2
+                width: '100%'
               }}>
                 <Tabs 
                   value={activeTab} 
@@ -152,7 +142,6 @@ function App() {
                   variant="fullWidth"
                   sx={{ 
                     minHeight: 48,
-                    px: 2,
                     '& .MuiTabs-flexContainer': {
                       height: 48
                     }
@@ -181,14 +170,20 @@ function App() {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'flex-start',
+                px: 3,
+                py: 3
               }}>
-                <Box sx={{ width: '100%', maxWidth: '900px' }}>
+                <Box sx={{ 
+                  width: '100%', 
+                  maxWidth: '900px',
+                  minWidth: '800px'
+                }}>
                   {activeTab === 'import' && <ImportTab />}
                   {activeTab === 'upload' && <UploadTab />}
                   {activeTab === 'settings' && <SettingsTab />}
                 </Box>
               </Box>
-            </Container>
+            </Box>
           </Box>
         </LocalizationProvider>
       </ThemeProvider>
