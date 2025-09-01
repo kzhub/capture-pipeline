@@ -34,27 +34,41 @@ function App() {
       <ThemeProvider theme={theme}>
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ja">
           <CssBaseline />
-          <AppBar position="static">
+          <AppBar position="static" sx={{ mb: 3 }}>
             <Toolbar>
-              <Typography variant="h5" component="h1" sx={{ flexGrow: 1 }}>
-                📸 Photo S3 Backup
-              </Typography>
-              <Typography variant="subtitle1">
-                写真をS3に安全にバックアップ
+              <Typography variant="h6" component="h1" sx={{ flexGrow: 1 }}>
+                Photo S3 Backup
               </Typography>
             </Toolbar>
           </AppBar>
 
-          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <Tabs value={activeTab} onChange={handleTabChange}>
-                <Tab label="SDカードから取り込み" value="import" />
-                <Tab label="ローカルからアップロード" value="upload" />
-                <Tab label="設定" value="settings" />
+          <Container maxWidth="xl" sx={{ mt: 2, mb: 4 }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+              <Tabs 
+                value={activeTab} 
+                onChange={handleTabChange}
+                variant="fullWidth"
+                sx={{ minHeight: 48 }}
+              >
+                <Tab 
+                  label="SDカードから取り込み" 
+                  value="import"
+                  sx={{ minHeight: 48, fontSize: '0.9rem' }}
+                />
+                <Tab 
+                  label="ローカルからアップロード" 
+                  value="upload"
+                  sx={{ minHeight: 48, fontSize: '0.9rem' }}
+                />
+                <Tab 
+                  label="設定" 
+                  value="settings"
+                  sx={{ minHeight: 48, fontSize: '0.9rem' }}
+                />
               </Tabs>
             </Box>
 
-            <Box sx={{ mt: 3 }}>
+            <Box sx={{ px: { xs: 1, sm: 2 } }}>
               {activeTab === 'import' && <ImportTab />}
               {activeTab === 'upload' && <UploadTab />}
               {activeTab === 'settings' && <SettingsTab />}

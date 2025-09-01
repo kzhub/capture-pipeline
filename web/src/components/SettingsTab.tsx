@@ -90,14 +90,14 @@ export function SettingsTab() {
 
   return (
     <>
-      <Card>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            <Settings sx={{ mr: 1, verticalAlign: 'middle' }} />
+      <Card elevation={2}>
+        <CardContent sx={{ p: 4 }}>
+          <Typography variant="h5" gutterBottom sx={{ mb: 3, display: 'flex', alignItems: 'center' }}>
+            <Settings sx={{ mr: 1 }} />
             設定
           </Typography>
 
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 3 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, mt: 3 }}>
             {/* AWS Status */}
             <Card variant="outlined">
               <CardContent>
@@ -129,19 +129,25 @@ export function SettingsTab() {
 
             {/* S3設定 */}
             <Box>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
                 S3設定
               </Typography>
               
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <TextField
-                  label="S3バケット名"
-                  value={config.S3_BUCKET}
-                  onChange={(e) => setConfig(prev => ({ ...prev, S3_BUCKET: e.target.value }))}
-                  required
-                  helperText="写真を保存するS3バケット名"
-                  fullWidth
-                />
+              <Box sx={{ 
+                display: 'grid', 
+                gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, 
+                gap: 3 
+              }}>
+                <Box sx={{ gridColumn: { xs: '1', md: '1 / -1' } }}>
+                  <TextField
+                    label="S3バケット名"
+                    value={config.S3_BUCKET}
+                    onChange={(e) => setConfig(prev => ({ ...prev, S3_BUCKET: e.target.value }))}
+                    required
+                    helperText="写真を保存するS3バケット名"
+                    fullWidth
+                  />
+                </Box>
 
                 <FormControl fullWidth>
                   <InputLabel>ストレージクラス</InputLabel>
@@ -151,7 +157,7 @@ export function SettingsTab() {
                   >
                     {STORAGE_CLASSES.map((storage) => (
                       <MenuItem key={storage.value} value={storage.value}>
-                        <Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           {storage.label}
                           <Chip
                             size="small"
@@ -165,21 +171,6 @@ export function SettingsTab() {
                   </Select>
                 </FormControl>
 
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                  <TextField
-                    label="RAWファイル用プレフィックス"
-                    value={config.S3_PREFIX_RAW}
-                    onChange={(e) => setConfig(prev => ({ ...prev, S3_PREFIX_RAW: e.target.value }))}
-                    fullWidth
-                  />
-                  <TextField
-                    label="JPGファイル用プレフィックス"
-                    value={config.S3_PREFIX_JPG}
-                    onChange={(e) => setConfig(prev => ({ ...prev, S3_PREFIX_JPG: e.target.value }))}
-                    fullWidth
-                  />
-                </Box>
-
                 <FormControl fullWidth>
                   <InputLabel>AWSリージョン</InputLabel>
                   <Select
@@ -192,6 +183,20 @@ export function SettingsTab() {
                     <MenuItem value="eu-west-1">Europe (Ireland)</MenuItem>
                   </Select>
                 </FormControl>
+
+                <TextField
+                  label="RAWファイル用プレフィックス"
+                  value={config.S3_PREFIX_RAW}
+                  onChange={(e) => setConfig(prev => ({ ...prev, S3_PREFIX_RAW: e.target.value }))}
+                  fullWidth
+                />
+                
+                <TextField
+                  label="JPGファイル用プレフィックス"
+                  value={config.S3_PREFIX_JPG}
+                  onChange={(e) => setConfig(prev => ({ ...prev, S3_PREFIX_JPG: e.target.value }))}
+                  fullWidth
+                />
               </Box>
             </Box>
 
@@ -213,21 +218,24 @@ export function SettingsTab() {
               />
             </Box>
 
-            <Button
-              variant="contained"
-              onClick={handleSave}
-              disabled={saveMutation.isPending}
-              startIcon={
-                saveMutation.isPending ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  <Save />
-                )
-              }
-              size="large"
-            >
-              設定を保存
-            </Button>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 2 }}>
+              <Button
+                variant="contained"
+                onClick={handleSave}
+                disabled={saveMutation.isPending}
+                startIcon={
+                  saveMutation.isPending ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    <Save />
+                  )
+                }
+                size="large"
+                sx={{ px: 4, py: 1.5 }}
+              >
+                設定を保存
+              </Button>
+            </Box>
 
             {saveMutation.isError && (
               <Alert severity="error">
