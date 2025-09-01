@@ -65,9 +65,10 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+          boxShadow: 'none',
           backgroundColor: '#ffffff',
           color: '#2d3748',
+          borderBottom: '1px solid #e2e8f0',
         },
       },
     },
@@ -124,7 +125,17 @@ function App() {
               </Toolbar>
             </AppBar>
 
-            <Container maxWidth="xl" sx={{ flex: 1, py: 3 }}>
+            <Container 
+              maxWidth={false}
+              sx={{ 
+                flex: 1, 
+                py: 3,
+                maxWidth: '1200px',
+                minWidth: '800px',
+                mx: 'auto',
+                px: { xs: 2, sm: 3, md: 4 }
+              }}
+            >
               <Box sx={{ 
                 borderBottom: 1, 
                 borderColor: 'divider', 
@@ -132,7 +143,8 @@ function App() {
                 position: 'sticky',
                 top: 0,
                 backgroundColor: 'background.default',
-                zIndex: 1
+                zIndex: 1,
+                mx: -2
               }}>
                 <Tabs 
                   value={activeTab} 
@@ -140,6 +152,7 @@ function App() {
                   variant="fullWidth"
                   sx={{ 
                     minHeight: 48,
+                    px: 2,
                     '& .MuiTabs-flexContainer': {
                       height: 48
                     }
@@ -165,11 +178,15 @@ function App() {
 
               <Box sx={{ 
                 minHeight: 'calc(100vh - 180px)',
-                px: { xs: 1, sm: 2 }
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'flex-start',
               }}>
-                {activeTab === 'import' && <ImportTab />}
-                {activeTab === 'upload' && <UploadTab />}
-                {activeTab === 'settings' && <SettingsTab />}
+                <Box sx={{ width: '100%', maxWidth: '900px' }}>
+                  {activeTab === 'import' && <ImportTab />}
+                  {activeTab === 'upload' && <UploadTab />}
+                  {activeTab === 'settings' && <SettingsTab />}
+                </Box>
               </Box>
             </Container>
           </Box>
