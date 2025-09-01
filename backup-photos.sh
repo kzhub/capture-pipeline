@@ -139,12 +139,10 @@ edit_config() {
 S3_BUCKET="$bucket_name"
 S3_PREFIX_RAW="raw"
 S3_PREFIX_JPG="jpg"
-S3_PREFIX_VIDEO="video"
 
 # ファイル拡張子（カンマ区切り）
 RAW_EXTENSIONS="dng,raf,cr2,cr3,nef,arw,orf,rw2"
 JPG_EXTENSIONS="jpg,jpeg,heic,heif"
-VIDEO_EXTENSIONS="mp4,mov,avi,mkv,mts"
 
 # 除外パターン（カンマ区切り）
 EXCLUDE_PATTERNS=".DS_Store,Thumbs.db,.thumbnails"
@@ -295,8 +293,6 @@ get_file_type() {
         echo "raw"
     elif [[ ",$JPG_EXTENSIONS," == *",$ext,"* ]]; then
         echo "jpg"
-    elif [[ ",$VIDEO_EXTENSIONS," == *",$ext,"* ]]; then
-        echo "video"
     else
         echo "unknown"
     fi
@@ -319,7 +315,7 @@ import_from_sd() {
     mkdir -p "$dest_dir"
     
     # 全拡張子のパターンを作成
-    local all_extensions="$RAW_EXTENSIONS,$JPG_EXTENSIONS,$VIDEO_EXTENSIONS"
+    local all_extensions="$RAW_EXTENSIONS,$JPG_EXTENSIONS"
     local ext_pattern=""
     IFS=',' read -ra EXTS <<< "$all_extensions"
     for ext in "${EXTS[@]}"; do
@@ -389,7 +385,7 @@ upload_to_s3() {
     load_config
     
     # 全拡張子のパターンを作成
-    local all_extensions="$RAW_EXTENSIONS,$JPG_EXTENSIONS,$VIDEO_EXTENSIONS"
+    local all_extensions="$RAW_EXTENSIONS,$JPG_EXTENSIONS"
     local ext_pattern=""
     IFS=',' read -ra EXTS <<< "$all_extensions"
     for ext in "${EXTS[@]}"; do
@@ -466,9 +462,6 @@ upload_to_s3() {
                 ;;
             jpg)
                 s3_prefix="$S3_PREFIX_JPG"
-                ;;
-            video)
-                s3_prefix="$S3_PREFIX_VIDEO"
                 ;;
             *)
                 [ "$VERBOSE" = true ] && echo "スキップ（未対応形式）: $filename"
