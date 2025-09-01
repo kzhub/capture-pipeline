@@ -82,7 +82,13 @@ export function SettingsTab() {
 
   if (configLoading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+      <Box 
+        display="flex" 
+        justifyContent="center" 
+        alignItems="center" 
+        minHeight="calc(100vh - 180px)"
+        width="100%"
+      >
         <CircularProgress />
       </Box>
     );
