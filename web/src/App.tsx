@@ -15,10 +15,10 @@ const queryClient = new QueryClient();
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#2d3748',
+      main: '#1976d2',
     },
     secondary: {
-      main: '#4a5568',
+      main: '#dc004e',
     },
     background: {
       default: '#f7fafc',
@@ -51,6 +51,9 @@ const theme = createTheme({
       },
     },
     MuiButton: {
+      defaultProps: {
+        disableRipple: true,
+      },
       styleOverrides: {
         root: {
           textTransform: 'none',
@@ -58,6 +61,9 @@ const theme = createTheme({
           boxShadow: 'none',
           '&:hover': {
             boxShadow: 'none',
+          },
+          '&:focus': {
+            outline: 'none',
           },
         },
       },
@@ -67,7 +73,7 @@ const theme = createTheme({
         root: {
           boxShadow: 'none',
           backgroundColor: '#ffffff',
-          color: '#2d3748',
+          color: '#1976d2',
           borderBottom: '1px solid #e2e8f0',
         },
       },
@@ -79,7 +85,7 @@ const theme = createTheme({
           height: 48,
         },
         indicator: {
-          backgroundColor: '#2d3748',
+          backgroundColor: '#1976d2',
           height: 2,
         },
       },
@@ -99,15 +105,15 @@ const theme = createTheme({
           transition: 'color 0.2s ease',
           overflow: 'hidden',
           '&.Mui-selected': {
-            color: '#2d3748',
+            color: '#1976d2',
             fontWeight: 600,
           },
           '&:hover': {
-            color: '#2d3748',
+            color: '#1976d2',
             backgroundColor: 'transparent',
           },
           '&:focus': {
-            outline: '2px solid #2d3748',
+            outline: '2px solid #1976d2',
             outlineOffset: '2px',
             backgroundColor: 'transparent',
           },
@@ -163,54 +169,18 @@ function App() {
                   value={activeTab} 
                   onChange={handleTabChange}
                   variant="fullWidth"
-                  aria-label="写真バックアップツールのメニュー"
-                  sx={{ 
-                    minHeight: 48,
-                    height: 48,
-                    '& .MuiTabs-flexContainer': {
-                      height: 48,
-                      minHeight: 48
-                    },
-                    '& .MuiTabs-scroller': {
-                      height: 48
-                    }
-                  }}
                 >
                   <Tab 
                     label="SDカードから取り込み" 
                     value="import"
-                    id="tab-import"
-                    aria-controls="tabpanel-import"
-                    sx={{ 
-                      minHeight: 48, 
-                      height: 48,
-                      fontSize: '0.9rem',
-                      flex: 1
-                    }}
                   />
                   <Tab 
                     label="ローカルからアップロード" 
                     value="upload"
-                    id="tab-upload"
-                    aria-controls="tabpanel-upload"
-                    sx={{ 
-                      minHeight: 48, 
-                      height: 48,
-                      fontSize: '0.9rem',
-                      flex: 1
-                    }}
                   />
                   <Tab 
                     label="設定" 
                     value="settings"
-                    id="tab-settings"
-                    aria-controls="tabpanel-settings"
-                    sx={{ 
-                      minHeight: 48, 
-                      height: 48,
-                      fontSize: '0.9rem',
-                      flex: 1
-                    }}
                   />
                 </Tabs>
               </Box>
