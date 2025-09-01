@@ -76,20 +76,43 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           minHeight: 48,
+          height: 48,
         },
         indicator: {
           backgroundColor: '#2d3748',
+          height: 2,
         },
       },
     },
     MuiTab: {
+      defaultProps: {
+        disableRipple: true,
+        disableTouchRipple: true,
+      },
       styleOverrides: {
         root: {
           textTransform: 'none',
           fontWeight: 500,
           color: '#4a5568',
+          minHeight: 48,
+          height: 48,
+          transition: 'color 0.2s ease',
+          overflow: 'hidden',
           '&.Mui-selected': {
             color: '#2d3748',
+            fontWeight: 600,
+          },
+          '&:hover': {
+            color: '#2d3748',
+            backgroundColor: 'transparent',
+          },
+          '&:focus': {
+            outline: '2px solid #2d3748',
+            outlineOffset: '2px',
+            backgroundColor: 'transparent',
+          },
+          '& .MuiTouchRipple-root': {
+            display: 'none !important',
           },
         },
       },
@@ -140,9 +163,15 @@ function App() {
                   value={activeTab} 
                   onChange={handleTabChange}
                   variant="fullWidth"
+                  aria-label="写真バックアップツールのメニュー"
                   sx={{ 
                     minHeight: 48,
+                    height: 48,
                     '& .MuiTabs-flexContainer': {
+                      height: 48,
+                      minHeight: 48
+                    },
+                    '& .MuiTabs-scroller': {
                       height: 48
                     }
                   }}
@@ -150,17 +179,38 @@ function App() {
                   <Tab 
                     label="SDカードから取り込み" 
                     value="import"
-                    sx={{ minHeight: 48, fontSize: '0.9rem' }}
+                    id="tab-import"
+                    aria-controls="tabpanel-import"
+                    sx={{ 
+                      minHeight: 48, 
+                      height: 48,
+                      fontSize: '0.9rem',
+                      flex: 1
+                    }}
                   />
                   <Tab 
                     label="ローカルからアップロード" 
                     value="upload"
-                    sx={{ minHeight: 48, fontSize: '0.9rem' }}
+                    id="tab-upload"
+                    aria-controls="tabpanel-upload"
+                    sx={{ 
+                      minHeight: 48, 
+                      height: 48,
+                      fontSize: '0.9rem',
+                      flex: 1
+                    }}
                   />
                   <Tab 
                     label="設定" 
                     value="settings"
-                    sx={{ minHeight: 48, fontSize: '0.9rem' }}
+                    id="tab-settings"
+                    aria-controls="tabpanel-settings"
+                    sx={{ 
+                      minHeight: 48, 
+                      height: 48,
+                      fontSize: '0.9rem',
+                      flex: 1
+                    }}
                   />
                 </Tabs>
               </Box>
