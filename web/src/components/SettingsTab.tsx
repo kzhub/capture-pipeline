@@ -1,0 +1,275 @@
+import { useState } from 'react';
+import * as React from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import {
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Button,
+  Alert,
+  Box,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  CircularProgress,
+  Divider,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from '@mui/material';
+import { Settings, Save, CheckCircle, Error, Warning } from '@mui/icons-material';
+import { api } from '../api';
+
+const STORAGE_CLASSES = [
+  { value: 'STANDARD', label: 'Standard（標準）', cost: '高' },
+  { value: 'STANDARD_IA', label: 'Standard-IA（低頻度アクセス）', cost: '中' },
+  { value: 'GLACIER', label: 'Glacier（アーカイブ）', cost: '低' },
+  { value: 'DEEP_ARCHIVE', label: 'Deep Archive（長期アーカイブ）', cost: '最低' },
+];
+
+export function SettingsTab() {
+  const [config, setConfig] = useState({
+    S3_BUCKET: '',
+    LOCAL_IMPORT_BASE: '',
+    S3_STORAGE_CLASS: 'DEEP_ARCHIVE',
+    S3_PREFIX_RAW: 'raw',
+    S3_PREFIX_JPG: 'jpg',
+    AWS_REGION: 'ap-northeast-1',
+  });
+  const [showWarning, setShowWarning] = useState(false);
+
+  const { data: currentConfig, isLoading: configLoading, refetch } = useQuery({
+    queryKey: ['config'],
+    queryFn: api.getConfig,
+  });
+
+  // Update config when data is loaded
+  React.useEffect(() => {
+    if (currentConfig?.configured) {
+      setConfig(currentConfig);
+    }
+  }, [currentConfig]);
+
+  const { data: awsStatus } = useQuery({
+    queryKey: ['aws-status'],
+    queryFn: api.checkAWS,
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: api.saveConfig,
+    onSuccess: () => {
+      refetch();
+    },
+  });
+
+  const handleSave = () => {
+    // Deep Archiveを選択した場合は警告を表示
+    if (config.S3_STORAGE_CLASS === 'DEEP_ARCHIVE') {
+      setShowWarning(true);
+    } else {
+      saveMutation.mutate(config);
+    }
+  };
+
+  const handleConfirmSave = () => {
+    setShowWarning(false);
+    saveMutation.mutate(config);
+  };
+
+  if (configLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  return (
+    <>
+      <Card>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>
+            <Settings sx={{ mr: 1, verticalAlign: 'middle' }} />
+            設定
+          </Typography>
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 3 }}>
+            {/* AWS Status */}
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="subtitle1" gutterBottom>
+                  AWS接続状態
+                </Typography>
+                {awsStatus?.configured ? (
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <CheckCircle color="success" />
+                    <Typography color="success.main">
+                      設定済み
+                      {awsStatus.identity?.Arn && (
+                        <Typography variant="body2" color="text.secondary" component="div">
+                          {awsStatus.identity.Arn}
+                        </Typography>
+                      )}
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Error color="error" />
+                    <Typography color="error.main">
+                      未設定
+                    </Typography>
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* S3設定 */}
+            <Box>
+              <Typography variant="h6" gutterBottom>
+                S3設定
+              </Typography>
+              
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField
+                  label="S3バケット名"
+                  value={config.S3_BUCKET}
+                  onChange={(e) => setConfig(prev => ({ ...prev, S3_BUCKET: e.target.value }))}
+                  required
+                  helperText="写真を保存するS3バケット名"
+                  fullWidth
+                />
+
+                <FormControl fullWidth>
+                  <InputLabel>ストレージクラス</InputLabel>
+                  <Select
+                    value={config.S3_STORAGE_CLASS}
+                    onChange={(e) => setConfig(prev => ({ ...prev, S3_STORAGE_CLASS: e.target.value }))}
+                  >
+                    {STORAGE_CLASSES.map((storage) => (
+                      <MenuItem key={storage.value} value={storage.value}>
+                        <Box>
+                          {storage.label}
+                          <Chip
+                            size="small"
+                            label={`コスト: ${storage.cost}`}
+                            color={storage.cost === '最低' ? 'success' : 'default'}
+                            sx={{ ml: 1 }}
+                          />
+                        </Box>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <TextField
+                    label="RAWファイル用プレフィックス"
+                    value={config.S3_PREFIX_RAW}
+                    onChange={(e) => setConfig(prev => ({ ...prev, S3_PREFIX_RAW: e.target.value }))}
+                    fullWidth
+                  />
+                  <TextField
+                    label="JPGファイル用プレフィックス"
+                    value={config.S3_PREFIX_JPG}
+                    onChange={(e) => setConfig(prev => ({ ...prev, S3_PREFIX_JPG: e.target.value }))}
+                    fullWidth
+                  />
+                </Box>
+
+                <FormControl fullWidth>
+                  <InputLabel>AWSリージョン</InputLabel>
+                  <Select
+                    value={config.AWS_REGION}
+                    onChange={(e) => setConfig(prev => ({ ...prev, AWS_REGION: e.target.value }))}
+                  >
+                    <MenuItem value="ap-northeast-1">Asia Pacific (Tokyo)</MenuItem>
+                    <MenuItem value="us-east-1">US East (N. Virginia)</MenuItem>
+                    <MenuItem value="us-west-2">US West (Oregon)</MenuItem>
+                    <MenuItem value="eu-west-1">Europe (Ireland)</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+            </Box>
+
+            <Divider />
+
+            {/* ローカル設定 */}
+            <Box>
+              <Typography variant="h6" gutterBottom>
+                ローカル設定
+              </Typography>
+              
+              <TextField
+                label="取り込み先ディレクトリ"
+                value={config.LOCAL_IMPORT_BASE}
+                onChange={(e) => setConfig(prev => ({ ...prev, LOCAL_IMPORT_BASE: e.target.value }))}
+                required
+                helperText="SDカードから取り込む際の保存先"
+                fullWidth
+              />
+            </Box>
+
+            <Button
+              variant="contained"
+              onClick={handleSave}
+              disabled={saveMutation.isPending}
+              startIcon={
+                saveMutation.isPending ? (
+                  <CircularProgress size={20} />
+                ) : (
+                  <Save />
+                )
+              }
+              size="large"
+            >
+              設定を保存
+            </Button>
+
+            {saveMutation.isError && (
+              <Alert severity="error">
+                設定の保存に失敗しました: {saveMutation.error?.message}
+              </Alert>
+            )}
+
+            {saveMutation.isSuccess && (
+              <Alert severity="success">
+                設定を保存しました
+              </Alert>
+            )}
+          </Box>
+        </CardContent>
+      </Card>
+
+      {/* Deep Archive警告ダイアログ */}
+      <Dialog open={showWarning} onClose={() => setShowWarning(false)}>
+        <DialogTitle>
+          <Warning color="warning" sx={{ mr: 1, verticalAlign: 'middle' }} />
+          Deep Archive設定について
+        </DialogTitle>
+        <DialogContent>
+          <Typography gutterBottom>
+            Deep Archiveを選択しました。以下の点にご注意ください：
+          </Typography>
+          <Box component="ul" sx={{ pl: 2 }}>
+            <li>最低12時間の保存期間制約があります</li>
+            <li>データの取得に12時間以上かかる場合があります</li>
+            <li>頻繁にアクセスする場合は追加料金が発生します</li>
+            <li>長期保存に最適ですが、すぐにアクセスが必要な場合は他のストレージクラスを推奨します</li>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowWarning(false)}>
+            キャンセル
+          </Button>
+          <Button onClick={handleConfirmSave} variant="contained" color="warning">
+            理解して保存
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
+}

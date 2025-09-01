@@ -1,0 +1,20 @@
+{
+  "name": "photo-s3-backup",
+  "version": "1.0.0",
+  "description": "Photo backup tool with S3 integration",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "server": "node server.js",
+    "dev": "concurrently \"yarn server\" \"cd web && yarn dev\"",
+    "web": "cd web && yarn dev",
+    "build": "cd web && yarn build",
+    "test": "cd web && yarn test",
+    "install-all": "yarn install && cd web && yarn install"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "concurrently": "^8.2.2"
+  }
+}

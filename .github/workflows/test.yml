@@ -1,0 +1,56 @@
+name: Test Web UI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'web/**'
+      - '.github/workflows/test.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'web/**'
+      - '.github/workflows/test.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'yarn'
+        cache-dependency-path: web/yarn.lock
+        
+    - name: Install dependencies
+      run: |
+        cd web
+        yarn install --frozen-lockfile
+        
+    - name: Run tests
+      run: |
+        cd web
+        yarn test --run
+        
+    - name: Run build
+      run: |
+        cd web
+        yarn build
+        
+    - name: Upload test coverage
+      uses: codecov/codecov-action@v4
+      if: matrix.node-version == '20.x'
+      with:
+        file: ./web/coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false

@@ -68,7 +68,12 @@ brew install awscli
 aws configure
 ```
 
-### 3. 初回設定（必須）
+### 3. プロジェクトの依存関係をインストール
+```bash
+yarn install-all
+```
+
+### 4. 初回設定（必須）
 ```bash
 ./backup-photos.sh --config
 ```
@@ -77,9 +82,58 @@ aws configure
 - **S3バケット名**: 写真を保存するS3バケット
 - **ローカル保存先**: SDカードから取り込む際の保存先（デフォルト: ~/Desktop）
 
-### 4. （オプション）環境変数でバケット名を上書き
+### 5. （オプション）環境変数でバケット名を上書き
 ```bash
 export PHOTO_BACKUP_BUCKET=your-s3-bucket-name
+```
+
+## Web UI の使用
+
+### 開発サーバー起動
+```bash
+yarn dev
+```
+
+これでAPIサーバー（http://localhost:3001）とWeb UI（http://localhost:5173）が同時に起動します。
+
+### Web UI 単体起動
+```bash
+yarn web
+```
+
+### Web UI の機能
+
+Web UIでは以下の操作が可能です：
+
+- **SDカードから取り込み**:
+  - ディレクトリ選択（/Volumes/EOS_DIGITALなど）
+  - カレンダーで日付選択
+  - ドライラン機能
+  - リアルタイム進捗表示
+
+- **ローカルからアップロード**:
+  - ディレクトリ選択
+  - 日付範囲指定
+  - 一括アップロード
+
+- **設定管理**:
+  - S3バケット設定
+  - ストレージクラス選択（Deep Archive警告付き）
+  - ローカル保存先設定
+  - AWS接続状態確認
+
+## テスト
+
+### Web UI のテスト実行
+```bash
+cd web
+yarn test
+```
+
+### テストカバレッジ
+```bash
+cd web
+yarn test:coverage
 ```
 
 ## 使い方
