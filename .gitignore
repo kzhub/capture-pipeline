@@ -12,9 +12,11 @@ node_modules/
 # アップロード履歴
 .uploaded
 
-# テスト用ファイル
-test/
+# テスト用ファイル（フロントエンドテストは除く）
+/test/
 *.test
+!web/src/**/__tests__/
+!web/src/test/
 
 # ログファイル
 *.log
