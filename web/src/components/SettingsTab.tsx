@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import * as React from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   Card,
@@ -219,7 +218,7 @@ export function SettingsTab() {
                   <TextField
                     label="S3バケット名"
                     value={config.S3_BUCKET}
-                    onChange={(e) => setConfig(prev => ({ ...prev, S3_BUCKET: e.target.value }))}
+                    onChange={(e) => setConfig((prev: any) => ({ ...prev, S3_BUCKET: e.target.value }))}
                     required
                     helperText="写真を保存するS3バケット名"
                     fullWidth
@@ -230,7 +229,7 @@ export function SettingsTab() {
                   <InputLabel>ストレージクラス</InputLabel>
                   <Select
                     value={config.S3_STORAGE_CLASS}
-                    onChange={(e) => setConfig(prev => ({ ...prev, S3_STORAGE_CLASS: e.target.value }))}
+                    onChange={(e) => setConfig((prev: any) => ({ ...prev, S3_STORAGE_CLASS: e.target.value }))}
                   >
                     {STORAGE_CLASSES.map((storage) => (
                       <MenuItem key={storage.value} value={storage.value}>
@@ -252,7 +251,7 @@ export function SettingsTab() {
                   <InputLabel>AWSリージョン</InputLabel>
                   <Select
                     value={config.AWS_REGION}
-                    onChange={(e) => setConfig(prev => ({ ...prev, AWS_REGION: e.target.value }))}
+                    onChange={(e) => setConfig((prev: any) => ({ ...prev, AWS_REGION: e.target.value }))}
                   >
                     <MenuItem value="ap-northeast-1">Asia Pacific (Tokyo)</MenuItem>
                     <MenuItem value="us-east-1">US East (N. Virginia)</MenuItem>
@@ -264,14 +263,14 @@ export function SettingsTab() {
                 <TextField
                   label="RAWファイル用プレフィックス"
                   value={config.S3_PREFIX_RAW}
-                  onChange={(e) => setConfig(prev => ({ ...prev, S3_PREFIX_RAW: e.target.value }))}
+                  onChange={(e) => setConfig((prev: any) => ({ ...prev, S3_PREFIX_RAW: e.target.value }))}
                   fullWidth
                 />
                 
                 <TextField
                   label="JPGファイル用プレフィックス"
                   value={config.S3_PREFIX_JPG}
-                  onChange={(e) => setConfig(prev => ({ ...prev, S3_PREFIX_JPG: e.target.value }))}
+                  onChange={(e) => setConfig((prev: any) => ({ ...prev, S3_PREFIX_JPG: e.target.value }))}
                   fullWidth
                 />
               </Box>
@@ -288,7 +287,7 @@ export function SettingsTab() {
               <TextField
                 label="取り込み先ディレクトリ"
                 value={config.LOCAL_IMPORT_BASE}
-                onChange={(e) => setConfig(prev => ({ ...prev, LOCAL_IMPORT_BASE: e.target.value }))}
+                onChange={(e) => setConfig((prev: any) => ({ ...prev, LOCAL_IMPORT_BASE: e.target.value }))}
                 required
                 helperText="SDカードから取り込む際の保存先"
                 fullWidth

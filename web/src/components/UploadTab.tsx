@@ -4,14 +4,9 @@ import {
   Card,
   CardContent,
   Typography,
-  TextField,
   Button,
   Alert,
   Box,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   CircularProgress,
   Switch,
   FormControlLabel,
@@ -30,10 +25,6 @@ export function UploadTab() {
   const [activeUploadId, setActiveUploadId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: volumes, isLoading: volumesLoading } = useQuery({
-    queryKey: ['volumes'],
-    queryFn: api.getVolumes,
-  });
 
   // Check for active uploads on component mount and refresh
   const { data: activeUploads } = useQuery({
@@ -279,7 +270,7 @@ export function UploadTab() {
           </Box>
         )}
 
-        {(uploadMutation.isError || uploadMutation.isSuccess || uploadMutation.data?.output) && (
+        {(uploadMutation.isError || uploadMutation.isSuccess || (uploadMutation.data as any)?.output) && (
           <Box sx={{ mt: 4, display: 'flex', flexDirection: 'column', gap: 2 }}>
             {uploadMutation.isError && (
               <Alert severity="error" sx={{ borderRadius: 2 }}>
@@ -293,7 +284,7 @@ export function UploadTab() {
               </Alert>
             )}
 
-            {uploadMutation.data?.output && (
+            {(uploadMutation.data as any)?.output && (
               <Card variant="outlined" sx={{ mt: 2 }}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
@@ -314,7 +305,7 @@ export function UploadTab() {
                       borderColor: 'grey.200',
                     }}
                   >
-                    {uploadMutation.data.output}
+                    {(uploadMutation.data as any).output}
                   </Box>
                 </CardContent>
               </Card>

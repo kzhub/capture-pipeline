@@ -1,17 +1,12 @@
 import { useState, useRef } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
   Typography,
-  TextField,
   Button,
   Alert,
   Box,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   CircularProgress,
   Switch,
   FormControlLabel,
@@ -27,10 +22,6 @@ export function ImportTab() {
   const [dryRun, setDryRun] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: volumes, isLoading: volumesLoading } = useQuery({
-    queryKey: ['volumes'],
-    queryFn: api.getVolumes,
-  });
 
   const handleDirectorySelect = () => {
     fileInputRef.current?.click();
@@ -150,7 +141,7 @@ export function ImportTab() {
           </Button>
         </Box>
 
-        {(importMutation.isError || importMutation.isSuccess || importMutation.data?.output) && (
+        {(importMutation.isError || importMutation.isSuccess || (importMutation.data as any)?.output) && (
           <Box sx={{ mt: 4, display: 'flex', flexDirection: 'column', gap: 2 }}>
             {importMutation.isError && (
               <Alert severity="error" sx={{ borderRadius: 2 }}>
@@ -164,7 +155,7 @@ export function ImportTab() {
               </Alert>
             )}
 
-            {importMutation.data?.output && (
+            {(importMutation.data as any)?.output && (
               <Card variant="outlined" sx={{ mt: 2 }}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
@@ -185,7 +176,7 @@ export function ImportTab() {
                       borderColor: 'grey.200',
                     }}
                   >
-                    {importMutation.data.output}
+                    {(importMutation.data as any).output}
                   </Box>
                 </CardContent>
               </Card>
