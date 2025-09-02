@@ -182,14 +182,16 @@ export function SettingsTab() {
                 {(awsStatus || cachedAwsStatus)?.configured ? (
                   <Box display="flex" alignItems="center" gap={1}>
                     <CheckCircle color="success" />
-                    <Typography color="success.main">
-                      設定済み
+                    <Box>
+                      <Typography color="success.main">
+                        設定済み
+                      </Typography>
                       {(awsStatus || cachedAwsStatus)?.identity?.Arn && (
-                        <Typography variant="body2" color="text.secondary" component="div">
+                        <Typography variant="body2" color="text.secondary">
                           {(awsStatus || cachedAwsStatus).identity.Arn}
                         </Typography>
                       )}
-                    </Typography>
+                    </Box>
                   </Box>
                 ) : (
                   <Box display="flex" alignItems="center" gap={1}>
