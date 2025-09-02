@@ -1,5 +1,3 @@
-import { useState, useRef, useEffect } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
@@ -14,99 +12,34 @@ import {
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { CloudUpload, FolderOpen } from '@mui/icons-material';
-import dayjs, { Dayjs } from 'dayjs';
-import { api } from '../api';
+import { useUpload } from '../hooks/useUpload';
 
 export function UploadTab() {
-  const [selectedPath, setSelectedPath] = useState('');
-  const [startDate, setStartDate] = useState<Dayjs | null>(null);
-  const [endDate, setEndDate] = useState<Dayjs | null>(null);
-  const [dryRun, setDryRun] = useState(true);
-  const [activeUploadId, setActiveUploadId] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const {
+    selectedPath,
+    startDate,
+    endDate,
+    dryRun,
+    activeUploadId,
+    fileInputRef,
+    setStartDate,
+    setEndDate,
+    setDryRun,
+    uploadStatus,
+    handleDirectorySelect,
+    handleFileChange,
+    handleUpload,
+    handleStop,
+    handleResume,
+    isFormValid,
+    isLoading,
+    hasActiveUpload,
+    isUploadRunning,
+    isUploadInterrupted,
+    uploadMutation,
+  } = useUpload();
 
 
-  // Check for active uploads on component mount and refresh
-  const { data: activeUploads } = useQuery({
-    queryKey: ['uploads'],
-    queryFn: api.getUploads,
-    refetchInterval: 2000, // Refresh every 2 seconds
-  });
-
-  // Monitor specific upload if active
-  const { data: uploadStatus } = useQuery({
-    queryKey: ['upload', activeUploadId],
-    queryFn: () => activeUploadId ? api.getUpload(activeUploadId) : null,
-    enabled: !!activeUploadId,
-    refetchInterval: 1000, // Refresh every second
-  });
-
-  // Restore active upload on component mount
-  useEffect(() => {
-    if (activeUploads && activeUploads.length > 0) {
-      const runningUpload = activeUploads.find((upload: any) => 
-        upload.status === 'running' || upload.status === 'interrupted'
-      );
-      if (runningUpload && !activeUploadId) {
-        setActiveUploadId(runningUpload.id);
-        setSelectedPath(runningUpload.sourcePath || '');
-        if (runningUpload.startDate) {
-          setStartDate(dayjs(runningUpload.startDate));
-        }
-        if (runningUpload.endDate) {
-          setEndDate(dayjs(runningUpload.endDate));
-        }
-        setDryRun(runningUpload.dryRun || false);
-      }
-    }
-  }, [activeUploads, activeUploadId]);
-
-  const handleDirectorySelect = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files && files.length > 0) {
-      const firstFile = files[0];
-      // webkitRelativePathから完全パスを構築
-      const pathParts = firstFile.webkitRelativePath.split('/');
-      if (pathParts.length > 1) {
-        // ファイルが選択された場合、そのディレクトリの完全パスを推測
-        // ブラウザのセキュリティ制限により、実際のパスは取得できないため、
-        // 選択されたディレクトリ名のみを表示し、サーバーサイドで解決する
-        const directoryName = pathParts[0];
-        setSelectedPath(directoryName);
-      }
-    }
-  };
-
-  const uploadMutation = useMutation({
-    mutationFn: (params: { 
-      sourcePath: string; 
-      startDate?: string; 
-      endDate?: string; 
-      dryRun: boolean 
-    }) => api.uploadPhotos(params.sourcePath, params.startDate, params.endDate, params.dryRun),
-    onSuccess: (data) => {
-      if (data.uploadId) {
-        setActiveUploadId(data.uploadId);
-      }
-    },
-  });
-
-  const handleUpload = () => {
-    if (!selectedPath) {
-      return;
-    }
-
-    uploadMutation.mutate({
-      sourcePath: selectedPath,
-      startDate: startDate?.format('YYYY-MM-DD'),
-      endDate: endDate?.format('YYYY-MM-DD'),
-      dryRun,
-    });
-  };
 
   return (
     <Card elevation={0} sx={{ height: 'fit-content' }}>
@@ -186,9 +119,9 @@ export function UploadTab() {
           <Button
             variant="contained"
             onClick={handleUpload}
-            disabled={!selectedPath || uploadMutation.isPending}
+            disabled={!isFormValid || isLoading}
             startIcon={
-              uploadMutation.isPending ? (
+              isLoading ? (
                 <CircularProgress size={20} />
               ) : (
                 <CloudUpload />
