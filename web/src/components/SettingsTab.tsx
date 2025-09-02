@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import * as React from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
@@ -31,8 +31,45 @@ const STORAGE_CLASSES = [
   { value: 'DEEP_ARCHIVE', label: 'Deep Archive（長期アーカイブ）', cost: '最低' },
 ];
 
+// SessionStorageキー
+const CACHE_KEY = 'photo-backup-config-cache';
+const AWS_STATUS_CACHE_KEY = 'photo-backup-aws-status-cache';
+
+// SessionStorageからキャッシュを取得
+const getCachedData = (key: string) => {
+  try {
+    const cached = sessionStorage.getItem(key);
+    if (cached) {
+      const data = JSON.parse(cached);
+      // 10分以内のキャッシュのみ有効
+      if (Date.now() - data.timestamp < 10 * 60 * 1000) {
+        return data.value;
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load cache:', error);
+  }
+  return null;
+};
+
+// SessionStorageにキャッシュを保存
+const setCachedData = (key: string, value: any) => {
+  try {
+    sessionStorage.setItem(key, JSON.stringify({
+      value,
+      timestamp: Date.now()
+    }));
+  } catch (error) {
+    console.error('Failed to save cache:', error);
+  }
+};
+
 export function SettingsTab() {
-  const [config, setConfig] = useState({
+  // キャッシュから初期値を取得
+  const cachedConfig = getCachedData(CACHE_KEY);
+  const cachedAwsStatus = getCachedData(AWS_STATUS_CACHE_KEY);
+  
+  const [config, setConfig] = useState(cachedConfig || {
     S3_BUCKET: '',
     LOCAL_IMPORT_BASE: '',
     S3_STORAGE_CLASS: 'DEEP_ARCHIVE',
@@ -41,27 +78,55 @@ export function SettingsTab() {
     AWS_REGION: 'ap-northeast-1',
   });
   const [showWarning, setShowWarning] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(!cachedConfig);
 
   const { data: currentConfig, isLoading: configLoading, refetch } = useQuery({
     queryKey: ['config'],
     queryFn: api.getConfig,
+    // キャッシュがある場合は背景で更新
+    staleTime: cachedConfig ? 0 : undefined,
+    refetchOnMount: true,
   });
 
-  // Update config when data is loaded
-  React.useEffect(() => {
+  // Update config when data is loaded and cache it
+  useEffect(() => {
     if (currentConfig?.configured) {
-      setConfig(currentConfig);
+      // キャッシュを更新
+      setCachedData(CACHE_KEY, currentConfig);
+      
+      // 差分がある場合のみ更新（再レンダリング）
+      const hasChanges = JSON.stringify(config) !== JSON.stringify(currentConfig);
+      if (hasChanges) {
+        setConfig(currentConfig);
+      }
+      
+      // 初回ロード完了
+      if (isInitialLoad) {
+        setIsInitialLoad(false);
+      }
     }
   }, [currentConfig]);
 
   const { data: awsStatus } = useQuery({
     queryKey: ['aws-status'],
     queryFn: api.checkAWS,
+    // キャッシュがある場合は背景で更新
+    staleTime: cachedAwsStatus ? 0 : undefined,
+    refetchOnMount: true,
   });
+  
+  // AWS Statusもキャッシュを更新
+  useEffect(() => {
+    if (awsStatus !== undefined) {
+      setCachedData(AWS_STATUS_CACHE_KEY, awsStatus);
+    }
+  }, [awsStatus]);
 
   const saveMutation = useMutation({
     mutationFn: api.saveConfig,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // キャッシュを更新
+      setCachedData(CACHE_KEY, { ...config, ...data });
       refetch();
     },
   });
@@ -80,7 +145,8 @@ export function SettingsTab() {
     saveMutation.mutate(config);
   };
 
-  if (configLoading) {
+  // 初回ロード時のみローディングを表示（キャッシュがない場合）
+  if (isInitialLoad && configLoading) {
     return (
       <Box 
         display="flex" 
@@ -109,15 +175,18 @@ export function SettingsTab() {
               <CardContent>
                 <Typography variant="subtitle1" gutterBottom>
                   AWS接続状態
+                  {configLoading && !isInitialLoad && (
+                    <CircularProgress size={16} sx={{ ml: 1 }} />
+                  )}
                 </Typography>
-                {awsStatus?.configured ? (
+                {(awsStatus || cachedAwsStatus)?.configured ? (
                   <Box display="flex" alignItems="center" gap={1}>
                     <CheckCircle color="success" />
                     <Typography color="success.main">
                       設定済み
-                      {awsStatus.identity?.Arn && (
+                      {(awsStatus || cachedAwsStatus)?.identity?.Arn && (
                         <Typography variant="body2" color="text.secondary" component="div">
-                          {awsStatus.identity.Arn}
+                          {(awsStatus || cachedAwsStatus).identity.Arn}
                         </Typography>
                       )}
                     </Typography>
