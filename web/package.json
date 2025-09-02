@@ -19,6 +19,7 @@
     "@mui/material": "^7.3.1",
     "@mui/x-date-pickers": "^8.11.0",
     "@tanstack/react-query": "^5.85.6",
+    "@testing-library/dom": "^10.4.1",
     "@types/react-datepicker": "^7.0.0",
     "axios": "^1.11.0",
     "date-fns": "^4.1.0",

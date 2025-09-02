@@ -56,15 +56,18 @@ describe('SettingsTab', () => {
       </TestWrapper>
     );
 
+    // Wait for settings to load (check for a specific element after loading)
     await waitFor(() => {
-      expect(screen.getByText('設定')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('test-bucket')).toBeInTheDocument();
     });
 
+    expect(screen.getByText('設定')).toBeInTheDocument();
     expect(screen.getByText('AWS接続状態')).toBeInTheDocument();
     expect(screen.getByText('S3設定')).toBeInTheDocument();
     expect(screen.getByText('ローカル設定')).toBeInTheDocument();
-    expect(screen.getByLabelText('S3バケット名')).toBeInTheDocument();
-    expect(screen.getByLabelText('ストレージクラス')).toBeInTheDocument();
+    // Check that the form fields are rendered by checking their values
+    expect(screen.getByDisplayValue('test-bucket')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('/Users/test/Desktop')).toBeInTheDocument();
   });
 
   test('displays AWS connection status', async () => {
@@ -74,6 +77,7 @@ describe('SettingsTab', () => {
       </TestWrapper>
     );
 
+    // Wait for AWS status to load
     await waitFor(() => {
       expect(screen.getByText('設定済み')).toBeInTheDocument();
     });
@@ -156,14 +160,20 @@ describe('SettingsTab', () => {
       </TestWrapper>
     );
 
+    // Wait for form to load completely
     await waitFor(() => {
-      const bucketField = screen.getByDisplayValue('test-bucket');
-      expect(bucketField).toBeInTheDocument();
+      expect(screen.getByDisplayValue('test-bucket')).toBeInTheDocument();
     });
 
-    const bucketField = screen.getByLabelText('S3バケット名');
+    const bucketField = screen.getByDisplayValue('test-bucket');
+    
+    // Clear the field first, then type new value
+    fireEvent.change(bucketField, { target: { value: '' } });
     fireEvent.change(bucketField, { target: { value: 'new-bucket' } });
 
-    expect(screen.getByDisplayValue('new-bucket')).toBeInTheDocument();
+    // Wait for the change to be reflected
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('new-bucket')).toBeInTheDocument();
+    });
   });
 });

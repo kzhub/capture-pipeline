@@ -55,48 +55,56 @@ describe('ImportTab', () => {
     );
 
     expect(screen.getByText('SDカード/カメラから写真を取り込み')).toBeInTheDocument();
-    expect(screen.getByLabelText('取り込み元ディレクトリ')).toBeInTheDocument();
-    expect(screen.getByLabelText('取り込み対象日')).toBeInTheDocument();
+    expect(screen.getByText('取り込み元ディレクトリを選択')).toBeInTheDocument();
+    // DatePicker creates multiple elements with the same text, so we check if at least one exists
+    expect(screen.getAllByText('取り込み対象日').length).toBeGreaterThan(0);
     expect(screen.getByLabelText('ドライラン（確認のみ、実際には実行しない）')).toBeInTheDocument();
   });
 
-  test('loads and displays volume options', async () => {
+  test('allows directory selection via file input', async () => {
     render(
       <TestWrapper>
         <ImportTab />
       </TestWrapper>
     );
 
-    await waitFor(() => {
-      fireEvent.mouseDown(screen.getByLabelText('取り込み元ディレクトリ'));
-    });
+    const button = screen.getByText('取り込み元ディレクトリを選択');
+    expect(button).toBeInTheDocument();
 
-    expect(await screen.findByText('EOS_DIGITAL (/Volumes/EOS_DIGITAL)')).toBeInTheDocument();
-    expect(screen.getByText('Desktop (/Users/test/Desktop)')).toBeInTheDocument();
+    // Simulate file selection
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    expect(fileInput).toBeInTheDocument();
+    expect(fileInput).toHaveAttribute('webkitdirectory');
   });
 
   test('enables import button when form is valid', async () => {
-    const { api } = await import('../../api');
-    
     render(
       <TestWrapper>
         <ImportTab />
       </TestWrapper>
     );
 
-    // Wait for volumes to load
-    await waitFor(() => {
-      expect(api.getVolumes).toHaveBeenCalled();
-    });
+    // Initially button should be disabled
+    const importButton = screen.getByRole('button', { name: /実行内容を確認/ });
+    expect(importButton).toBeDisabled();
 
-    // Select a directory
-    fireEvent.mouseDown(screen.getByLabelText('取り込み元ディレクトリ'));
-    const option = await screen.findByText('EOS_DIGITAL (/Volumes/EOS_DIGITAL)');
-    fireEvent.click(option);
+    // Simulate directory selection
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const mockFile = new File([''], 'test/photo.jpg');
+    Object.defineProperty(mockFile, 'webkitRelativePath', {
+      value: 'TestDirectory/photo.jpg',
+      writable: false,
+    });
+    Object.defineProperty(fileInput, 'files', {
+      value: [mockFile],
+      writable: false,
+    });
+    fireEvent.change(fileInput);
 
     // Button should be enabled now
-    const importButton = screen.getByRole('button', { name: /実行内容を確認/ });
-    expect(importButton).not.toBeDisabled();
+    await waitFor(() => {
+      expect(importButton).not.toBeDisabled();
+    });
   });
 
   test('calls import API when form is submitted', async () => {
@@ -108,21 +116,29 @@ describe('ImportTab', () => {
       </TestWrapper>
     );
 
-    // Wait for volumes to load and select directory
-    await waitFor(() => {
-      fireEvent.mouseDown(screen.getByLabelText('取り込み元ディレクトリ'));
+    // Simulate directory selection
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const mockFile = new File([''], 'test/photo.jpg');
+    Object.defineProperty(mockFile, 'webkitRelativePath', {
+      value: 'TestDirectory/photo.jpg',
+      writable: false,
     });
-    
-    const option = await screen.findByText('EOS_DIGITAL (/Volumes/EOS_DIGITAL)');
-    fireEvent.click(option);
+    Object.defineProperty(fileInput, 'files', {
+      value: [mockFile],
+      writable: false,
+    });
+    fireEvent.change(fileInput);
 
     // Click import button
     const importButton = screen.getByRole('button', { name: /実行内容を確認/ });
+    await waitFor(() => {
+      expect(importButton).not.toBeDisabled();
+    });
     fireEvent.click(importButton);
 
     await waitFor(() => {
       expect(api.importPhotos).toHaveBeenCalledWith(
-        '/Volumes/EOS_DIGITAL',
+        'TestDirectory',
         expect.any(String), // Date string
         true // dryRun default
       );
@@ -136,15 +152,23 @@ describe('ImportTab', () => {
       </TestWrapper>
     );
 
-    // Select directory and submit
-    await waitFor(() => {
-      fireEvent.mouseDown(screen.getByLabelText('取り込み元ディレクトリ'));
+    // Simulate directory selection
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const mockFile = new File([''], 'test/photo.jpg');
+    Object.defineProperty(mockFile, 'webkitRelativePath', {
+      value: 'TestDirectory/photo.jpg',
+      writable: false,
     });
-    
-    const option = await screen.findByText('EOS_DIGITAL (/Volumes/EOS_DIGITAL)');
-    fireEvent.click(option);
+    Object.defineProperty(fileInput, 'files', {
+      value: [mockFile],
+      writable: false,
+    });
+    fireEvent.change(fileInput);
 
     const importButton = screen.getByRole('button', { name: /実行内容を確認/ });
+    await waitFor(() => {
+      expect(importButton).not.toBeDisabled();
+    });
     fireEvent.click(importButton);
 
     // Wait for success message
