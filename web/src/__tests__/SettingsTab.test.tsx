@@ -1,11 +1,11 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { SettingsTab } from '../SettingsTab';
+import { SettingsTab } from '../components/SettingsTab';
 import { vi } from 'vitest';
 
 // Mock the API
-vi.mock('../../api', () => ({
+vi.mock('../api', () => ({
   api: {
     getConfig: vi.fn().mockResolvedValue({
       configured: true,
@@ -123,7 +123,7 @@ describe('SettingsTab', () => {
   });
 
   test('saves configuration after confirming Deep Archive warning', async () => {
-    const { api } = await import('../../api');
+    const { api } = await import('../api');
     
     render(
       <TestWrapper>

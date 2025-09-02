@@ -3,11 +3,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { ImportTab } from '../ImportTab';
+import { ImportTab } from '../components/ImportTab';
 import { vi } from 'vitest';
 
 // Mock the API
-vi.mock('../../api', () => ({
+vi.mock('../api', () => ({
   api: {
     getVolumes: vi.fn().mockResolvedValue([
       { name: 'EOS_DIGITAL', path: '/Volumes/EOS_DIGITAL', type: 'volume' },
@@ -108,7 +108,7 @@ describe('ImportTab', () => {
   });
 
   test('calls import API when form is submitted', async () => {
-    const { api } = await import('../../api');
+    const { api } = await import('../api');
     
     render(
       <TestWrapper>
